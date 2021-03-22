@@ -94,7 +94,7 @@ namespace EasyRestApi
             HttpClient client = new HttpClient();
             var rawResponse = client.GetAsync(url).Result;
                 var s = rawResponse.Content.ReadAsStringAsync().Result;
-                r = s.RemoveQuotes();
+                r = s;
             return Deserializar<T>(r);
         }
         static T Get<T>(string url, RestParams parameters)
@@ -128,7 +128,7 @@ namespace EasyRestApi
             var content = new FormUrlEncodedContent(parameters.ConvertValues());
             var rawResponse = client.PostAsync(url, content).Result;
             var s = rawResponse.Content.ReadAsStringAsync().Result;
-            r = s.RemoveQuotes();
+            r = s;
             return Deserializar<T>(r);
         }
 
