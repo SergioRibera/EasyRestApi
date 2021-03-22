@@ -19,8 +19,7 @@ namespace EasyRestApi
         /// <returns></returns>
         public static string Excecute(string url, EasyMethod method, RestParams parameters = null)
         {
-            return Task.Run(() =>
-            {
+            return Task.Run(() => {
                 switch (method)
                 {
                     case EasyMethod.Get:
@@ -66,37 +65,13 @@ namespace EasyRestApi
                 s = s.Replace("\\", "");
             return s;
         }
-        static string RemoveGetter(this string s)
-        {
-            char[] c = s.ToCharArray();
-            string ss = "";
-            for (int i = 0; i < c.Length - 1; i++)
-            {
-                ss += c[i];
-            }
-            return ss;
-        }
-        static string GetValues(this RestParams r)
-        {
-            string s = "?";
-            foreach (var p in r.ProcesedValues)
-                s += p.Key + "=" + p.Value + "&";
-            return s.RemoveGetter();
-        }
-        static List<KeyValuePair<string, string>> ConvertValues(this RestParams r)
-        {
-            List<KeyValuePair<string, string>> k = new List<KeyValuePair<string, string>>();
-            foreach (var p in r.ProcesedValues)
-                k.Add(new KeyValuePair<string, string>(p.Key, (string)p.Value));
-            return k;
-        }        
         static string Get(string url)
         {
             string r = "";
             HttpClient client = new HttpClient();
-            if (client.GetAsync(url).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.GetAsync(url).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
             }
             return r;
@@ -104,11 +79,11 @@ namespace EasyRestApi
         static string Get(string url, RestParams parameters)
         {
             string r = "";
-            url = url + parameters.GetValues();
+            url = url + parameters.ProcessedValuesForApi();
             HttpClient client = new HttpClient();
-            if (client.GetAsync(url).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.GetAsync(url).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
             }
             return r;
@@ -117,9 +92,9 @@ namespace EasyRestApi
         {
             string r = "";
             HttpClient client = new HttpClient();
-            if (client.GetAsync(url).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.GetAsync(url).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
             }
             return Deserializar<T>(r);
@@ -127,11 +102,11 @@ namespace EasyRestApi
         static T Get<T>(string url, RestParams parameters)
         {
             string r = "";
-            url = url + parameters.GetValues();
+            url = url + parameters.ProcessedValuesForApi();
             HttpClient client = new HttpClient();
-            if (client.GetAsync(url).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.GetAsync(url).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
             }
             return Deserializar<T>(r);
@@ -139,14 +114,15 @@ namespace EasyRestApi
         static string Post(string url, RestParams parameters)
         {
             string r = "";
-            url = url + parameters.GetValues();
+            url = url + parameters.ProcessedValuesForApi();
             HttpClient client = new HttpClient();
             var content = new FormUrlEncodedContent(parameters.ConvertValues());
-            if (client.PostAsync(url, content).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.PostAsync(url, content).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
-            }
+            } else
+                r = rawResponse.Content.ReadAsStringAsync().Result;
             return r;
         }
         static T Post<T>(string url, RestParams parameters)
@@ -154,11 +130,12 @@ namespace EasyRestApi
             string r = "";
             HttpClient client = new HttpClient();
             var content = new FormUrlEncodedContent(parameters.ConvertValues());
-            if(client.PostAsync(url, content).Result.StatusCode == HttpStatusCode.OK)
-            {
-                var s = client.GetAsync(url).Result.Content.ReadAsStringAsync().Result;
+            var rawResponse = client.PostAsync(url, content).Result;
+            if (rawResponse.StatusCode == HttpStatusCode.OK) {
+                var s = rawResponse.Content.ReadAsStringAsync().Result;
                 r = s.RemoveQuotes();
-            }
+            } else
+                throw new Exception(rawResponse.Content.ReadAsStringAsync().Result);
             return Deserializar<T>(r);
         }
 
