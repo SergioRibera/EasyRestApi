@@ -162,6 +162,7 @@ namespace EasyRestApi
             return Deserializar<T>(r);
         }
 
+
         static T Deserializar<T>(this string s)
         {
             try

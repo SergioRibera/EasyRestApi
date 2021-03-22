@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace EasyRestApi
 {
@@ -43,6 +42,10 @@ namespace EasyRestApi
                 Keys.Add(p.Key);
                 Values.Add(p.Value);
             }
+        }
+        public void ClearParams(){
+            Keys.Clear();
+            Values.Clear();
         }
         public void AddParam(string name, object value)
         {
